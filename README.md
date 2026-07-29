@@ -8,6 +8,23 @@ Inspired by [**LDR | Movie Visualizer**](https://github.com/ldr-devx/ldr-obsidia
 
 ---
 
+## Screenshots
+
+### Dashboard
+![Dashboard hero and stats bar](docs/dashboard-hero.jpg)
+![Dashboard carousels — Recently Finished and Favorites](docs/dashboard-carousels.jpg)
+
+### Catalog
+![Catalog — filterable grid of books](docs/catalog.jpg)
+
+### Series
+![Series — completion tracking across your library](docs/series.jpg)
+
+### Book Detail
+![Book detail — rating, reading history, mood and review](docs/book-detail.jpg)
+
+---
+
 ## Features
 
 ### Dashboard
