@@ -1,0 +1,100 @@
+[
+  {
+    "schemaVersion": "0.1.0",
+    "name": "Goodreads Book",
+    "behavior": "create",
+    "noteContentFormat": "",
+    "properties": [
+      {
+        "name": "title",
+        "value": "{{selector:\"h1[data-testid='bookTitle']\" | trim}}",
+        "type": "text"
+      },
+      {
+        "name": "author",
+        "value": "{{selector:\".ContributorLink__name\" | list}}",
+        "type": "multitext"
+      },
+      {
+        "name": "series",
+        "value": "{{selector:\"h3.Text__title3 a[href*='/series/']\" | trim}}",
+        "type": "text"
+      },
+      {
+        "name": "year",
+        "value": "{{selector:\"p[data-testid='publicationInfo']\" | trim}}",
+        "type": "text"
+      },
+      {
+        "name": "pages",
+        "value": "{{selector:\"p[data-testid='pagesFormat']\" | trim}}",
+        "type": "number"
+      },
+      {
+        "name": "publisher",
+        "value": "{{selector:\"p[data-testid='publicationInfo']\" | trim}}",
+        "type": "text"
+      },
+      {
+        "name": "genre",
+        "value": "{{selector:\"a[href*='/genres/'] .Button__labelItem\" | list}}",
+        "type": "multitext"
+      },
+      {
+        "name": "synopsis",
+        "value": "{{selector:\"[data-testid='description'] .Formatted\" | trim}}",
+        "type": "text"
+      },
+      {
+        "name": "scoreGoodreads",
+        "value": "{{selector:\".RatingStatistics__rating\" | trim}}",
+        "type": "number"
+      },
+      {
+        "name": "cover",
+        "value": "{{selector:\".BookCover__image img, .ResponsiveImage\"?src}}",
+        "type": "text"
+      },
+      {
+        "name": "isbn13",
+        "value": "{{selector:\"[data-testid='contentContainer']\" | trim}}",
+        "type": "text"
+      },
+      {
+        "name": "format",
+        "value": "physical",
+        "type": "text"
+      },
+      {
+        "name": "status",
+        "value": "to-read",
+        "type": "text"
+      },
+      {
+        "name": "favorite",
+        "value": "false",
+        "type": "checkbox"
+      },
+      {
+        "name": "timesRead",
+        "value": "0",
+        "type": "number"
+      },
+      {
+        "name": "created",
+        "value": "{{date}}",
+        "type": "date"
+      },
+      {
+        "name": "categories",
+        "value": "Books",
+        "type": "multitext"
+      }
+    ],
+    "noteNameFormat": "{{title}}",
+    "path": "Books",
+    "triggers": [
+      "goodreads.com/book/show"
+    ]
+  }
+]

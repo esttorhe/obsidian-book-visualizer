@@ -1,0 +1,152 @@
+filters:
+  and:
+    - categories.contains(link("Books"))
+    - '!file.name.contains("Template")'
+properties:
+  file.name:
+    displayName: Title
+  note.author:
+    displayName: Author
+  note.series:
+    displayName: Series
+  note.seriesNumber:
+    displayName: "#"
+  note.year:
+    displayName: Year
+  note.genre:
+    displayName: Genre
+  note.rating:
+    displayName: My Rating
+  note.scoreGoodreads:
+    displayName: Goodreads
+  note.pages:
+    displayName: Pages
+  note.status:
+    displayName: Status
+  note.format:
+    displayName: Format
+  note.started:
+    displayName: Started
+  note.finished:
+    displayName: Finished
+  note.favorite:
+    displayName: Fav
+  note.timesRead:
+    displayName: Times
+  note.review:
+    displayName: Review
+views:
+  - type: table
+    name: All
+    order:
+      - file.name
+      - author
+      - series
+      - year
+      - rating
+      - scoreGoodreads
+      - genre
+      - status
+    sort:
+      - property: finished
+        direction: DESC
+      - property: file.name
+        direction: ASC
+  - type: table
+    name: To-Read
+    filters:
+      and:
+        - status == "to-read"
+    order:
+      - file.name
+      - author
+      - series
+      - year
+      - scoreGoodreads
+      - pages
+      - genre
+    sort:
+      - property: scoreGoodreads
+        direction: DESC
+      - property: file.name
+        direction: ASC
+  - type: table
+    name: Currently Reading
+    filters:
+      and:
+        - status == "reading"
+    order:
+      - file.name
+      - author
+      - series
+      - currentPage
+      - pages
+      - started
+    sort:
+      - property: started
+        direction: DESC
+  - type: table
+    name: Favorites
+    filters:
+      and:
+        - note.favorite == true
+    order:
+      - file.name
+      - author
+      - series
+      - year
+      - rating
+      - scoreGoodreads
+      - finished
+    sort:
+      - property: rating
+        direction: DESC
+      - property: scoreGoodreads
+        direction: DESC
+  - type: table
+    name: By Author
+    filters:
+      and:
+        - list(author).contains(this)
+    order:
+      - file.name
+      - series
+      - seriesNumber
+      - year
+      - rating
+      - scoreGoodreads
+      - status
+    sort:
+      - property: year
+        direction: ASC
+  - type: table
+    name: By Series
+    filters:
+      and:
+        - series == this
+    order:
+      - file.name
+      - seriesNumber
+      - author
+      - rating
+      - status
+      - finished
+    sort:
+      - property: seriesNumber
+        direction: ASC
+  - type: table
+    name: By Genre
+    filters:
+      and:
+        - list(genre).contains(this)
+    order:
+      - file.name
+      - author
+      - rating
+      - year
+      - status
+    sort:
+      - property: rating
+        direction: DESC
+      - property: scoreGoodreads
+        direction: DESC
