@@ -6,7 +6,7 @@ import { BookDataService } from "../services/BookDataService";
 import { StatsEngine } from "../services/StatsEngine";
 import { createStarRating } from "../components/StarRating";
 import { createCarousel } from "../components/Carousel";
-import { readingProgress } from "../services/frontmatter";
+import { readingProgress, cleanSearchTitle } from "../services/frontmatter";
 
 const stats = new StatsEngine();
 
@@ -193,10 +193,13 @@ export function renderBookDetail(container: HTMLElement, opts: BookDetailOptions
 	});
 	actions.appendChild(statusBtn);
 
-	// External Goodreads link (search by ISBN13 when present, else title+author)
+	// External Goodreads link (search by ISBN13 when present, else title+author).
+	// book.title falls back to the note's filename — which carries this vault's
+	// capture-timestamp prefix — when there's no explicit `title` frontmatter
+	// field, so it must be cleaned before it's used in a search query.
 	const grHref = book.isbn13
 		? `https://www.goodreads.com/search?q=${encodeURIComponent(book.isbn13)}`
-		: `https://www.goodreads.com/search?q=${encodeURIComponent([book.title, ...book.author].join(" "))}`;
+		: `https://www.goodreads.com/search?q=${encodeURIComponent([cleanSearchTitle(book.title), ...book.author].join(" "))}`;
 	const grLink = document.createElement("a");
 	grLink.href = grHref;
 	grLink.className = "bkv-btn bkv-btn--sm bkv-btn--ghost";

@@ -13,6 +13,7 @@ import {
 	parseBookFields,
 	isBookFrontmatter,
 	readingProgress,
+	cleanSearchTitle,
 } from "../src/services/frontmatter";
 
 describe("stripWikilink", () => {
@@ -20,6 +21,25 @@ describe("stripWikilink", () => {
 		expect(stripWikilink("[[Dune]]")).toBe("Dune");
 		expect(stripWikilink("[[authors/Herbert|Frank Herbert]]")).toBe("Frank Herbert");
 		expect(stripWikilink("plain")).toBe("plain");
+	});
+});
+
+describe("cleanSearchTitle", () => {
+	it("strips a leading YYYYMMDDHHmm capture timestamp", () => {
+		// `book.title` falls back to the note's filename when there's no explicit
+		// `title` frontmatter field (true for every note in this vault), and that
+		// filename carries a 12-digit capture timestamp prefix that must never leak
+		// into an external search query.
+		expect(cleanSearchTitle("202607282118 The Legend of Uh")).toBe("The Legend of Uh");
+	});
+
+	it("leaves titles without a timestamp prefix untouched", () => {
+		expect(cleanSearchTitle("The Legend of Uh")).toBe("The Legend of Uh");
+	});
+
+	it("does not strip a number that isn't exactly 12 digits", () => {
+		expect(cleanSearchTitle("1984")).toBe("1984");
+		expect(cleanSearchTitle("2001 A Space Odyssey")).toBe("2001 A Space Odyssey");
 	});
 });
 

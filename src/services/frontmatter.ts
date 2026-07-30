@@ -2,6 +2,14 @@
 // ABOUTME: No Obsidian runtime imports so this module is unit-testable in isolation.
 import type { Book, BookStatus, BookFormat } from "../types";
 
+// `Book.title` falls back to the note's filename when there's no explicit `title`
+// frontmatter field, and that filename may carry a capture-timestamp prefix
+// (`YYYYMMDDHHmm <Title>`). That's fine for display, but it must never leak into
+// an external search query (Goodreads, etc.) — strip it there specifically.
+export function cleanSearchTitle(title: string): string {
+	return title.replace(/^\d{12}\s+/, "").trim();
+}
+
 // Strip [[wikilink]] syntax (and optional alias) from a string.
 export function stripWikilink(s: string): string {
 	const inner = s.replace(/^\[\[/, "").replace(/\]\]$/, "");
