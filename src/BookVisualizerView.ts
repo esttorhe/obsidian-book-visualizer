@@ -324,6 +324,7 @@ export class BookVisualizerView extends ItemView {
 			onBack: () => this.navigateTo("catalog"),
 			onBookClick: (b) => this.openBookDetail(b),
 			onFavToggle: handlers.onFavToggle,
+			onEditNote: (b) => this.app.workspace.getLeaf("tab").openFile(b.file),
 		});
 		// Reached directly from openBookDetail() too, which bypasses renderRoute's
 		// reset — a book opened from partway down a scrolled catalog must still

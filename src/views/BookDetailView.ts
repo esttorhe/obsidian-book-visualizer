@@ -24,6 +24,7 @@ export interface BookDetailOptions {
 	onBack: () => void;
 	onBookClick: (book: Book) => void;
 	onFavToggle: (book: Book) => void;
+	onEditNote?: (book: Book) => void;
 }
 
 function today(): string {
@@ -192,6 +193,16 @@ export function renderBookDetail(container: HTMLElement, opts: BookDetailOptions
 		renderBookDetail(container, opts);
 	});
 	actions.appendChild(statusBtn);
+
+	if (opts.onEditNote) {
+		const editBtn = document.createElement("button");
+		editBtn.className = "bkv-btn bkv-btn--sm bkv-btn--ghost";
+		setIcon(editBtn, "pencil");
+		editBtn.appendChild(document.createTextNode(" Edit note"));
+		editBtn.title = "Open this book's note to edit its frontmatter directly";
+		editBtn.addEventListener("click", () => opts.onEditNote!(book));
+		actions.appendChild(editBtn);
+	}
 
 	// External Goodreads link (search by ISBN13 when present, else title+author).
 	// book.title falls back to the note's filename — which carries this vault's
