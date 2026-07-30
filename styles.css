@@ -129,7 +129,12 @@
 }
 
 /* ── Views base ───────────────────────────────────────────── */
-.bkv-view { flex: 1; min-width: 0; overflow-x: hidden; }
+/* min-height: 0 is load-bearing: without it, a flex item defaults to
+   min-height: auto (grow-to-fit-content) and never actually constrains its
+   height, so no descendant's overflow-y: auto ever gets a bounded box to
+   scroll within — everything just grows and the whole pane scrolls as one
+   long page instead of individual regions scrolling independently. */
+.bkv-view { flex: 1; min-width: 0; min-height: 0; overflow-x: hidden; }
 .bkv-view--dashboard { overflow-y: auto; padding-bottom: 40px; }
 
 .bkv-view__title {
@@ -623,6 +628,18 @@
 .bkv-btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
 
 /* ── Catalog layout ────────────────────────────────────────── */
+/* .bkv-view--catalog is a bounded-height flex column: the toolbar takes its
+   natural height (flex-shrink: 0, may wrap to multiple lines on narrow
+   screens) and .bkv-layout gets exactly the remaining space (flex: 1;
+   min-height: 0), so its own children can genuinely scroll independently
+   instead of relying on a fragile "100vh minus a guessed toolbar height"
+   magic number that breaks the moment the toolbar wraps. */
+.bkv-view--catalog {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+}
 .bkv-toolbar {
 	display: flex;
 	align-items: center;
@@ -631,9 +648,7 @@
 	border-bottom: 1px solid var(--background-modifier-border);
 	gap: 10px;
 	flex-wrap: wrap;
-	position: sticky;
-	top: 0;
-	z-index: 20;
+	flex-shrink: 0;
 }
 .bkv-toolbar__left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
 .bkv-toolbar__count { font-size: 12px; color: var(--text-faint); white-space: nowrap; }
@@ -654,16 +669,17 @@
 .bkv-search-input:focus { border-color: var(--bkv-accent); }
 .bkv-search-input--standalone { max-width: 100%; }
 
-.bkv-layout { display: grid; grid-template-columns: 210px 1fr; min-height: calc(100vh - 57px); }
+.bkv-layout { display: grid; grid-template-columns: 210px 1fr; flex: 1; min-height: 0; overflow: hidden; }
 .bkv-layout--no-sidebar { grid-template-columns: 0 1fr; }
 .bkv-layout__sidebar {
 	overflow-y: auto;
 	overflow-x: hidden;
+	min-height: 0;
 	background: var(--background-secondary);
 	border-right: 1px solid var(--background-modifier-border);
 }
 .bkv-layout--no-sidebar .bkv-layout__sidebar { display: none; }
-.bkv-layout__content { overflow-y: auto; }
+.bkv-layout__content { overflow-y: auto; min-height: 0; }
 
 /* ── Filter sidebar ────────────────────────────────────────── */
 .bkv-sidebar { padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
@@ -1157,6 +1173,77 @@
 .bkv-runtime-badge { text-align: center; padding: 16px; font-size: 12px; color: var(--text-faint); font-style: italic; }
 .bkv-text-muted { font-size: 13px; color: var(--text-muted); margin: 0; padding: 0 24px 8px; }
 .bkv-detail__back { top: 14px; }
+
+/* ── Mobile / narrow-pane responsive ──────────────────────────
+   Applies below 700px, which covers phones and a narrow desktop split
+   pane alike — a fixed 200px nav plus a fixed 210px catalog filter
+   column (410px combined) exceeds most phone screens outright, so both
+   collapse to an off-canvas drawer / stacked layout here. */
+.bkv-nav-toggle {
+	display: none;
+	position: fixed;
+	top: 8px;
+	left: 8px;
+	z-index: 101;
+	width: 32px;
+	height: 32px;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--bkv-card-radius);
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	color: var(--text-normal);
+	cursor: pointer;
+}
+.bkv-nav-toggle svg { width: 17px; height: 17px; }
+
+.bkv-nav-backdrop {
+	display: none;
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 99;
+}
+
+@media (max-width: 700px) {
+	.bkv-nav-toggle { display: flex; }
+
+	.bkv-nav {
+		position: fixed;
+		top: 0;
+		left: 0;
+		height: 100%;
+		z-index: 100;
+		transform: translateX(-100%);
+		transition: transform 200ms ease;
+		box-shadow: 2px 0 16px rgba(0, 0, 0, 0.35);
+	}
+	.bkv-root--nav-open .bkv-nav { transform: translateX(0); }
+	.bkv-root--nav-open .bkv-nav-backdrop { display: block; }
+
+	.bkv-content { padding-top: 42px; }
+
+	/* Catalog: stack the filter panel above the grid instead of a side
+	   column — the existing sidebar-toggle button still fully hides it
+	   via .bkv-layout--no-sidebar for when the grid needs all the room. */
+	.bkv-layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+	/* .bkv-layout__content is pinned to row 2 explicitly: when the sidebar is
+	   display:none (via --no-sidebar), grid auto-placement removes it from
+	   consideration entirely and the content item would otherwise slide up
+	   into row 1, which .bkv-layout--no-sidebar collapses to 0 — leaving the
+	   grid at zero height. Explicit placement makes this independent of
+	   whether the sidebar happens to be present. */
+	.bkv-layout__content { grid-row: 2; }
+	/* Must re-set grid-template-columns here too: the base (desktop) rule's
+	   "0 1fr" columns value is still active at this specificity otherwise,
+	   producing a conflicting 2x2 template. */
+	.bkv-layout--no-sidebar { grid-template-columns: 1fr; grid-template-rows: 0 1fr; }
+	.bkv-layout__sidebar {
+		max-height: 42vh;
+		border-right: none;
+		border-bottom: 1px solid var(--background-modifier-border);
+	}
+}
 
 /* ── Scrollbars ────────────────────────────────────────────── */
 .bkv-content::-webkit-scrollbar,

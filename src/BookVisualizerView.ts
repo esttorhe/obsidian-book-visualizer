@@ -62,6 +62,7 @@ const TIERLIST_PATH = `${PLUGIN_DIR}/tierlist.json`;
 export class BookVisualizerView extends ItemView {
 	private service!: BookDataService;
 	private currentRoute: Route = "dashboard";
+	private rootEl!: HTMLElement;
 	private navEl!: HTMLElement;
 	private viewContentEl!: HTMLElement;
 	private unsubscribe?: () => void;
@@ -96,9 +97,19 @@ export class BookVisualizerView extends ItemView {
 		const root = this.containerEl.children[1] as HTMLElement;
 		root.empty();
 		root.addClass("bkv-root");
+		this.rootEl = root;
 
 		this.navEl = root.createDiv("bkv-nav");
 		this.buildNav();
+
+		// Mobile-only: the nav sidebar becomes an off-canvas drawer below 700px
+		// (see the responsive block in styles.css); these two elements open/close it.
+		const navToggle = root.createDiv("bkv-nav-toggle");
+		setIcon(navToggle, "menu");
+		navToggle.addEventListener("click", () => root.toggleClass("bkv-root--nav-open", !root.hasClass("bkv-root--nav-open")));
+
+		const navBackdrop = root.createDiv("bkv-nav-backdrop");
+		navBackdrop.addEventListener("click", () => root.removeClass("bkv-root--nav-open"));
 
 		this.viewContentEl = root.createDiv("bkv-content");
 
@@ -162,6 +173,7 @@ export class BookVisualizerView extends ItemView {
 
 	private navigateTo(route: Route, data?: unknown): void {
 		this.currentRoute = route;
+		this.rootEl.removeClass("bkv-root--nav-open");
 
 		this.navEl.querySelectorAll(".bkv-nav__item").forEach((el) => {
 			const r = (el as HTMLElement).dataset.route;
@@ -284,10 +296,15 @@ export class BookVisualizerView extends ItemView {
 				}
 				break;
 		}
+
+		// A freshly rendered route should always open at the top, not wherever
+		// the previous route happened to leave scrollTop.
+		this.viewContentEl.scrollTop = 0;
 	}
 
 	private openBookDetail(book: Book): void {
 		this.currentRoute = "detail";
+		this.rootEl.removeClass("bkv-root--nav-open");
 		this.navEl.querySelectorAll(".bkv-nav__item").forEach((el) => el.classList.remove("bkv-nav__item--active"));
 
 		this.viewContentEl.classList.add("bkv-content--exit");
@@ -308,5 +325,9 @@ export class BookVisualizerView extends ItemView {
 			onBookClick: (b) => this.openBookDetail(b),
 			onFavToggle: handlers.onFavToggle,
 		});
+		// Reached directly from openBookDetail() too, which bypasses renderRoute's
+		// reset — a book opened from partway down a scrolled catalog must still
+		// open at the top, not wherever the catalog's scrollTop happened to be.
+		this.viewContentEl.scrollTop = 0;
 	}
 }
