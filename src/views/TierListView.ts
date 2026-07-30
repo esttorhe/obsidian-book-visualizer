@@ -39,6 +39,14 @@ export function renderTierList(container: HTMLElement, opts: TierListOptions): v
 	container.innerHTML = "";
 	container.className = "bkv-view bkv-view--tierlist";
 
+	// Native HTML5 drag-and-drop only auto-scrolls the window/document, not an inner
+	// scrollable pane like this one — so dragging near the top/bottom edge here would
+	// otherwise do nothing. Drive it manually off drag events, which bubble to `container`.
+	const autoScroll = attachAutoScroll(container);
+	container.addEventListener("dragstart", autoScroll.onDragStart);
+	container.addEventListener("dragover", autoScroll.onDragOver);
+	container.addEventListener("dragend", autoScroll.onDragEnd);
+
 	const books = opts.service.books;
 	const bookMap = new Map(books.map((b) => [b.id, b]));
 
@@ -255,6 +263,51 @@ function createItem(book: Book, sourceTierId: string, onClick: (b: Book) => void
 	item.addEventListener("click", () => onClick(book));
 
 	return item;
+}
+
+const AUTOSCROLL_EDGE_ZONE = 60; // px from the container's top/bottom edge that triggers scrolling
+const AUTOSCROLL_MAX_SPEED = 18; // px per animation frame at the very edge
+
+interface AutoScrollController {
+	onDragStart: () => void;
+	onDragOver: (e: DragEvent) => void;
+	onDragEnd: () => void;
+}
+
+function attachAutoScroll(scrollEl: HTMLElement): AutoScrollController {
+	let pointerY: number | null = null;
+	let rafId: number | null = null;
+
+	const tick = () => {
+		if (pointerY != null) {
+			const rect = scrollEl.getBoundingClientRect();
+			const distFromTop = pointerY - rect.top;
+			const distFromBottom = rect.bottom - pointerY;
+			if (distFromTop >= 0 && distFromTop < AUTOSCROLL_EDGE_ZONE) {
+				scrollEl.scrollTop -= AUTOSCROLL_MAX_SPEED * (1 - distFromTop / AUTOSCROLL_EDGE_ZONE);
+			} else if (distFromBottom >= 0 && distFromBottom < AUTOSCROLL_EDGE_ZONE) {
+				scrollEl.scrollTop += AUTOSCROLL_MAX_SPEED * (1 - distFromBottom / AUTOSCROLL_EDGE_ZONE);
+			}
+		}
+		rafId = requestAnimationFrame(tick);
+	};
+
+	return {
+		onDragStart: () => {
+			pointerY = null;
+			if (rafId == null) rafId = requestAnimationFrame(tick);
+		},
+		onDragOver: (e: DragEvent) => {
+			pointerY = e.clientY;
+		},
+		onDragEnd: () => {
+			pointerY = null;
+			if (rafId != null) {
+				cancelAnimationFrame(rafId);
+				rafId = null;
+			}
+		},
+	};
 }
 
 function attachDropZone(el: HTMLElement, onDrop: (bookId: string, sourceTierId: string) => void): void {

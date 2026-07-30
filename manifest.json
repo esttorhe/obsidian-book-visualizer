@@ -1,7 +1,7 @@
 {
   "id": "book-visualizer",
   "name": "Book Visualizer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "1.4.0",
   "description": "Visual book catalog with dashboard, reading progress, series tracking, author stats, top lists, tier lists, reviews and more.",
   "author": "Esteban Torres",
