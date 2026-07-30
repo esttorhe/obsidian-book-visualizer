@@ -160,6 +160,20 @@ describe("parseBookFields", () => {
 		expect(parseBookFields({ title: "Solaris" }).titleOriginal).toBe("Solaris");
 		expect(parseBookFields({ title: "Solaris", titleOriginal: "Solaris (PL)" }).titleOriginal).toBe("Solaris (PL)");
 	});
+
+	it("reads synopsis from the vault's actual `plot` frontmatter key", () => {
+		// Every real note (hand-written and imported) stores the description under
+		// `plot`, matching the movie/TV plugin's convention, not `synopsis`.
+		expect(parseBookFields({ plot: "A book about a book." }).synopsis).toBe("A book about a book.");
+	});
+
+	it("falls back to `synopsis` if `plot` is absent", () => {
+		expect(parseBookFields({ synopsis: "Alternate key." }).synopsis).toBe("Alternate key.");
+	});
+
+	it("prefers `plot` over `synopsis` when both are present", () => {
+		expect(parseBookFields({ plot: "Primary", synopsis: "Secondary" }).synopsis).toBe("Primary");
+	});
 });
 
 describe("isBookFrontmatter", () => {

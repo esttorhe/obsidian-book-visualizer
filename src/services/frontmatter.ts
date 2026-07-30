@@ -115,7 +115,7 @@ export function parseBookFields(fm: Record<string, unknown>): Omit<Book, "id" | 
 		review: toStringValue(fm.review),
 		mood: toStringValue(fm.mood),
 
-		synopsis: toStringValue(fm.synopsis),
+		synopsis: toStringValue(fm.plot) ?? toStringValue(fm.synopsis),
 		awards: toStringValue(fm.awards),
 		tags: toStringArray(fm.tags),
 		created: toStringValue(fm.created),

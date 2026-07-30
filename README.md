@@ -135,7 +135,7 @@ timesRead: 1
 review: A quietly strange, deeply moving book.
 mood: contemplative
 
-synopsis: A man lives in a house that is the world...
+plot: A man lives in a house that is the world...
 awards: Women's Prize for Fiction (2021)
 tags:
   - favorites
@@ -152,6 +152,7 @@ categories:
 | `series` / `seriesNumber` | string / number | Powers the **Series** view's completion tracking and reading order. Leave both unset for standalone books. |
 | `pages` | number or string | Accepts a plain number, or text like `"352 pages"` / `"1,024"` — the digits are extracted. |
 | `format` | `physical` \| `ebook` \| `audiobook` | Common spellings (`paperback`, `hardcover`, `kindle`, `epub`, `audible`, …) are normalized. |
+| `plot` | string | The book's synopsis/blurb. Named `plot` (not `synopsis`) to match the same field name used by the movie/TV visualizer, so the same term is used consistently across this vault's media notes. `synopsis` is accepted as a fallback if `plot` isn't present. |
 | `status` | `to-read` \| `reading` \| `read` \| `dnf` | If omitted or unrecognized, it's **inferred**: a `finished` date or `timesRead > 0` → `read`; a `started` date or `currentPage > 0` → `reading`; otherwise `to-read`. Common synonyms (`currently-reading`, `finished`, `abandoned`, `want-to-read`, …) are also normalized. |
 | `currentPage` | number | Reading progress while `status: reading`; the detail view shows a progress bar (`currentPage / pages`). |
 | `rating` | number 1–10 | Your personal score, 0.5 steps supported. |
